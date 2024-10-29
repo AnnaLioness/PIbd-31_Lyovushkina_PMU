@@ -10,9 +10,9 @@ class DetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orangeAccent,
+      backgroundColor: Colors.lightGreenAccent,
      appBar: AppBar(
-       backgroundColor: Colors.deepOrange,
+       backgroundColor: Colors.purple,
        title: const Text("Детальная информация"),
      ),
       body: Column(

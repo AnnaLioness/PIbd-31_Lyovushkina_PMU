@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:pmu_labs/data/repositories/mock_repository.dart';
+import '../../data/repositories/potter_repository.dart';
 import '../../domain/models/card.dart';
 import '../details_page/details_page.dart';
+import '../dialogs/show_dialog.dart';
 
 part 'card.dart';
 class MyHomePage extends StatefulWidget {
@@ -18,65 +21,91 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.purple,
         title: Text(widget.title),
       ),
-      backgroundColor: Colors.orangeAccent,
+      backgroundColor: Colors.lightGreenAccent,
       body: const Body(),
     );
   }
 }
 
-class Body extends StatelessWidget {
-  const Body({super.key});
+class Body extends StatefulWidget {
+  const Body({Key? key}) : super(key: key);
 
+  @override
+  State<Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<Body> {
+  final searchController = TextEditingController();
+  late Future<List<CardData>?> data;
+  final repo = PotterRepository();
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    data = repo.loadData(onError: (e) => showErrorDialog(context, error: e));
+    isLoading = true;
+    data.then((_) => setState(() {
+      isLoading = false; // Остановить индикатор при завершении загрузки
+    }));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final data = [
-      CardData(
-        'Ромео и Джулиетта',
-        description: 'быть может, твой единственный алмаз простым стеклом покажется на глаз',
-        image: 'https://avatars.dzeninfra.ru/get-zen_doc/271828/pub_660f0ff5d45a53675bbdc247_660f11a7d45a53675bbf9e04/scale_1200',
-      ),
-      CardData(
-          'Гамлет',
-          description: 'подарок нам не мил, когда разлюбит тот, кто подарил',
-          image: 'https://wildfauna.ru/wp-content/uploads/2019/03/mangust-24.jpg'
-      ),
-      CardData(
-        'Ромео и Джулиетта',
-        description: 'роза пахнет розой, хоть розой назови её, хоть нет',
-        image: 'https://i.pinimg.com/736x/a4/12/d2/a412d2b34b122778ce0438376de72ce4--west-indies-mongoose.jpg',
-      ),
-      CardData(
-          'Макбет',
-          description: 'кажись цветком и будь змеёй под ним',
-          image: 'https://avatars.mds.yandex.net/i?id=377eb3486621069ac13b04f30d3aed57_l-5301760-images-thumbs&n=13'
-      )
-    ];
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: data.map((e) => _MyCardWidget.formData(e,
-            onLike: (bool isLiked) {
-              _showSnackBar(context, isLiked);
-            },
-            onTap: () => _navToDetails(context, e),
-          )).toList(),
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      child : Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: CupertinoSearchTextField(
+              controller: searchController,
+              onChanged: (search) {
+                setState( () {
+                  data = repo.loadData(q: search);
+                });
+              },
+            ),
+          ),
+      Expanded(
+      child: Center(
+        child: FutureBuilder<List<CardData>?>(
+          future: data,
+          builder: (context, snapshot) => SingleChildScrollView(
+          child: snapshot.hasData
+            ?Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: snapshot.data?.map((data) {
+              return _MyCardWidget.formData(
+                  data,
+                  onLike: (bool isLiked) {
+                  _showSnackBar(context, isLiked);
+                  },
+                  onTap: () => _navToDetails(context, data),
+              );
+              }).toList() ??
+              [],
+            )
+              :const CircularProgressIndicator(),
+          ),
         ),
       ),
+      ),
+      ],
+    ),
     );
   }
   void _showSnackBar(BuildContext context, bool isLiked) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-          'Вы ${isLiked ? 'лайкнули' : 'убрали лайк с'} мангуста',
+          'Вы ${isLiked ? 'лайкнули зелье' : 'убрали лайк с зелья'}',
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: Colors.lightGreenAccent,
         duration: const Duration(seconds: 2),
       ));
     });

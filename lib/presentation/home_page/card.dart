@@ -34,12 +34,12 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
       onTap: widget.onTap,
       child: Container(
         margin: const EdgeInsets.only(top: 10),
-        constraints: const BoxConstraints(minHeight: 140),
+        constraints: const BoxConstraints(minHeight: 200),
         decoration: BoxDecoration(
-            color: Colors.deepOrangeAccent,
+            color: Colors.purpleAccent,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.red,
+              color: Colors.purple,
               width: 3,
             )
         ),
@@ -98,7 +98,7 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
                       child: isLiked
                           ? const Icon(
                         Icons.favorite,
-                        color: Colors.amberAccent,
+                        color: Colors.lightGreenAccent,
                         key: ValueKey<int>(0),
                       )
                           : const Icon(
