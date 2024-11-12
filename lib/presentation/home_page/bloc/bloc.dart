@@ -7,7 +7,26 @@ class HomeBloc extends Bloc<HomeEvent, HomeState>{
   HomeBloc(this.repo) : super(const HomeState()){
     on<HomeLoadDataEvent>(_onLoadData);
   }
-  void _onLoadData(HomeLoadDataEvent event, Emitter<HomeState> emit){
-    emit(state.copyWit(data: repo.loadData()));
+  void _onLoadData(HomeLoadDataEvent event, Emitter<HomeState> emit) async{
+    if(event.nextPage == null) {
+      emit(state.copyWith(isLoading: true));
+    } else {
+      emit(state.copyWith(isPaginationLoading: true));
+    }
+    String? error;
+    final data = await repo.loadData(
+        q: event.search,
+        page: event.nextPage ?? 1,
+        onError: (e) => error = e,
+    );
+    if (event.nextPage != null){
+      data?.data?.insertAll(0, state.data?.data ?? []);
+    }
+    emit(state.copyWith(
+      data: data,
+      isLoading: false,
+      isPaginationLoading: false,
+      error: error,
+    ));
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pmu_labs/components/utils/debounce.dart';
 import 'package:pmu_labs/data/repositories/mock_repository.dart';
 import 'package:pmu_labs/presentation/home_page/bloc/bloc.dart';
 import 'package:pmu_labs/presentation/home_page/bloc/events.dart';
@@ -43,25 +44,31 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   final searchController = TextEditingController();
-  late Future<List<CardData>?> data;
+  /*late Future<List<CardData>?> data;
   final repo = PotterRepository();
-  bool isLoading = false;
+  bool isLoading = false;*/
+  final scrollController = ScrollController();
 
-  /*@override
-  void initState() {
-    data = repo.loadData(onError: (e) => showErrorDialog(context, error: e));
-    isLoading = true;
-    data.then((_) => setState(() {
-      isLoading = false; // Остановить индикатор при завершении загрузки
-    }));
-    super.initState();
-  }*/
   @override
   void initState(){
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HomeBloc>().add(const HomeLoadDataEvent());
     });
+    scrollController.addListener(_onNextPageListener);
     super.initState();
+  }
+
+  void _onNextPageListener() {
+    if (scrollController.offset >= scrollController.position.maxScrollExtent) {
+      // preventing multiple pagination request on multiple swipes
+      final bloc = context.read<HomeBloc>();
+      if (!bloc.state.isPaginationLoading) {
+        bloc.add(HomeLoadDataEvent(
+          search: searchController.text,
+          nextPage: bloc.state.data?.nextPage,
+        ));
+      }
+    }
   }
 
   @override
@@ -81,61 +88,46 @@ class _BodyState extends State<Body> {
             child: CupertinoSearchTextField(
               controller: searchController,
               onChanged: (search) {
-                setState( () {
-                  data = repo.loadData(q: search);
-                });
+                Debounce.run(() => context.read<HomeBloc>().add(HomeLoadDataEvent(search: search)));
               },
             ),
           ),
       BlocBuilder<HomeBloc, HomeState>(
-          builder: (context, snapshot) => FutureBuilder<List<CardData>?>(
-            future: state.data,
-            builder: (context, snapshot) => snapshot.hasData
-              ? Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                    itemCount: snapshot.data?.length ?? 0,
-                    itemBuilder: (context, index){
-                    final data = snapshot.data?[index];
-                    return data != null
-                        ? _MyCardWidget.formData(
-                      data,
-                      onLike: (bool isLiked) {
-                        _showSnackBar(context, isLiked);
+          builder: (context, state) => state.error != null
+            ? Text(
+              state.error ?? '',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.red),
+            )
+            :state.isLoading
+              ? const CircularProgressIndicator()
+              : Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: ListView.builder(
+                    controller: scrollController,
+                    padding: EdgeInsets.zero,
+                      itemCount: state.data?.data?.length ?? 0,
+                      itemBuilder: (context, index){
+                      final data = state.data?.data?[index];
+                      return data != null
+                          ? _MyCardWidget.formData(
+                        data,
+                        onLike: (bool isLiked) {
+                          _showSnackBar(context, isLiked);
+                        },
+                        onTap: () => _navToDetails(context, data),
+                      )
+                          : const SizedBox.shrink();
                       },
-                      onTap: () => _navToDetails(context, data),
-                    )
-                        : const SizedBox.shrink();
-                    },
+                  ),
                 ),
-            )
-                : const CircularProgressIndicator(),
-          ),
+            ),
       ),
-      /*Expanded(
-      child: Center(
-        child: FutureBuilder<List<CardData>?>(
-          future: data,
-          builder: (context, snapshot) => SingleChildScrollView(
-          child: snapshot.hasData
-            ?Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: snapshot.data?.map((data) {
-              return _MyCardWidget.formData(
-                  data,
-                  onLike: (bool isLiked) {
-                  _showSnackBar(context, isLiked);
-                  },
-                  onTap: () => _navToDetails(context, data),
-              );
-              }).toList() ??
-              [],
-            )
-              :const CircularProgressIndicator(),
+          BlocBuilder<HomeBloc, HomeState>(
+            builder: (context, state) => state.isPaginationLoading
+                ? const CircularProgressIndicator()
+                : const SizedBox.shrink(),
           ),
-        ),
-      ),
-      ),*/
       ],
     ),
     );
@@ -157,6 +149,10 @@ class _BodyState extends State<Body> {
       context,
       CupertinoPageRoute(builder: (context) => DetailsPage(data)),
     );
+  }
+  Future<void> _onRefresh(){
+    context.read<HomeBloc>().add(HomeLoadDataEvent(search: searchController.text));
+    return Future.value(null);
   }
 }
 

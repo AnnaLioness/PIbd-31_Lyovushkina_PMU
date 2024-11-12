@@ -1,9 +1,11 @@
 import '../../domain/models/card.dart';
+import '../../domain/models/home.dart';
 import 'api_interface.dart';
 class MockRepository extends ApiInterface {
   @override
-  Future<List<CardData>?> loadData({OnErrorCallback? onError}) async {
-    return [
+  Future<HomeData?> loadData({OnErrorCallback? onError}) async {
+    return HomeData(
+      data: [
       CardData(
         'Ромео и Джулиетта',
         description: 'быть может, твой единственный алмаз простым стеклом покажется на глаз',
@@ -23,7 +25,8 @@ class MockRepository extends ApiInterface {
           'Макбет',
           description: 'кажись цветком и будь змеёй под ним',
           image: 'https://avatars.mds.yandex.net/i?id=377eb3486621069ac13b04f30d3aed57_l-5301760-images-thumbs&n=13'
-      )
-    ];
+      ),
+    ],
+    );
   }
 }

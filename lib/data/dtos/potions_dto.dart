@@ -4,13 +4,36 @@ part 'potions_dto.g.dart';
 @JsonSerializable(createToJson: false)
 class PotionsDto{
   final List<PotionDataDto>? data;
-
+  final MetaDto? meta;
   const PotionsDto({
-  this.data,
+    this.data,
+    this.meta,
   });
 
   factory PotionsDto.fromJson(Map<String, dynamic> json) =>
       _$PotionsDtoFromJson(json);
+}
+@JsonSerializable(createToJson: false)
+class MetaDto {
+  final PaginationDto? pagination;
+
+  const MetaDto({this.pagination});
+
+  factory MetaDto.fromJson(Map<String, dynamic> json) =>
+      _$MetaDtoFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class PaginationDto {
+  final int? current;
+  final int? next;
+  final int? last;
+  final int? records;
+
+  const PaginationDto({this.current, this.next, this.last, this.records});
+
+  factory PaginationDto.fromJson(Map<String, dynamic> json) =>
+      _$PaginationDtoFromJson(json);
 }
 @JsonSerializable(createToJson: false)
 class PotionDataDto {
