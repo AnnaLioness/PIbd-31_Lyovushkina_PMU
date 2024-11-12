@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pmu_labs/data/repositories/mock_repository.dart';
+import 'package:pmu_labs/presentation/home_page/bloc/bloc.dart';
+import 'package:pmu_labs/presentation/home_page/bloc/events.dart';
+import 'package:pmu_labs/presentation/home_page/bloc/state.dart';
 import '../../data/repositories/potter_repository.dart';
 import '../../domain/models/card.dart';
 import '../details_page/details_page.dart';
@@ -43,7 +47,7 @@ class _BodyState extends State<Body> {
   final repo = PotterRepository();
   bool isLoading = false;
 
-  @override
+  /*@override
   void initState() {
     data = repo.loadData(onError: (e) => showErrorDialog(context, error: e));
     isLoading = true;
@@ -51,6 +55,19 @@ class _BodyState extends State<Body> {
       isLoading = false; // Остановить индикатор при завершении загрузки
     }));
     super.initState();
+  }*/
+  @override
+  void initState(){
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeBloc>().add(const HomeLoadDataEvent());
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose(){
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,7 +87,32 @@ class _BodyState extends State<Body> {
               },
             ),
           ),
-      Expanded(
+      BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, snapshot) => FutureBuilder<List<CardData>?>(
+            future: state.data,
+            builder: (context, snapshot) => snapshot.hasData
+              ? Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                    itemCount: snapshot.data?.length ?? 0,
+                    itemBuilder: (context, index){
+                    final data = snapshot.data?[index];
+                    return data != null
+                        ? _MyCardWidget.formData(
+                      data,
+                      onLike: (bool isLiked) {
+                        _showSnackBar(context, isLiked);
+                      },
+                      onTap: () => _navToDetails(context, data),
+                    )
+                        : const SizedBox.shrink();
+                    },
+                ),
+            )
+                : const CircularProgressIndicator(),
+          ),
+      ),
+      /*Expanded(
       child: Center(
         child: FutureBuilder<List<CardData>?>(
           future: data,
@@ -93,7 +135,7 @@ class _BodyState extends State<Body> {
           ),
         ),
       ),
-      ),
+      ),*/
       ],
     ),
     );

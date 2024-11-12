@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pmu_labs/data/repositories/potter_repository.dart';
+import 'package:pmu_labs/presentation/home_page/bloc/bloc.dart';
 import 'package:pmu_labs/presentation/home_page/home_page.dart';
 
 void main() {
@@ -15,7 +18,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepOrange
       ),
-      home: const MyHomePage(title: 'Лёвушкина Анна Александровна'),
+      //: const MyHomePage(title: 'Лёвушкина Анна Александровна'),
+      home: RepositoryProvider(
+        lazy: true,
+        create: (_) => PotterRepository(),
+        child: BlocProvider<HomeBloc>(
+          lazy: false,
+          create: (context) => HomeBloc(context.read<PotterRepository>()),
+          child: const MyHomePage(title: 'Лёвушкина Анна Александровна'),
+        ),
+      ),
     );
   }
 }
