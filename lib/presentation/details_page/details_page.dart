@@ -11,27 +11,29 @@ class DetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightGreenAccent,
-     appBar: AppBar(
-       backgroundColor: Colors.purple,
-       title: const Text("Детальная информация"),
-     ),
+      appBar: AppBar(
+        backgroundColor: Colors.purple,
+        title: const Text("Детальная информация"),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Image.network(data.image ?? '',),
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Image.network(
+              data.image ?? '',
+            ),
           ),
           Padding(
-              padding: const EdgeInsets.only(bottom: 4.0),
-              child: Text(
-                data.text,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Text(
+              data.text,
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
           ),
           Text(
             data.description,
-              style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge,
           )
         ],
       ),

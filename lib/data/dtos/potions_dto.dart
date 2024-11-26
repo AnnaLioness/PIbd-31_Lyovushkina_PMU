@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'potions_dto.g.dart';
 
 @JsonSerializable(createToJson: false)
-class PotionsDto{
+class PotionsDto {
   final List<PotionDataDto>? data;
   final MetaDto? meta;
   const PotionsDto({
@@ -10,17 +10,16 @@ class PotionsDto{
     this.meta,
   });
 
-  factory PotionsDto.fromJson(Map<String, dynamic> json) =>
-      _$PotionsDtoFromJson(json);
+  factory PotionsDto.fromJson(Map<String, dynamic> json) => _$PotionsDtoFromJson(json);
 }
+
 @JsonSerializable(createToJson: false)
 class MetaDto {
   final PaginationDto? pagination;
 
   const MetaDto({this.pagination});
 
-  factory MetaDto.fromJson(Map<String, dynamic> json) =>
-      _$MetaDtoFromJson(json);
+  factory MetaDto.fromJson(Map<String, dynamic> json) => _$MetaDtoFromJson(json);
 }
 
 @JsonSerializable(createToJson: false)
@@ -32,9 +31,9 @@ class PaginationDto {
 
   const PaginationDto({this.current, this.next, this.last, this.records});
 
-  factory PaginationDto.fromJson(Map<String, dynamic> json) =>
-      _$PaginationDtoFromJson(json);
+  factory PaginationDto.fromJson(Map<String, dynamic> json) => _$PaginationDtoFromJson(json);
 }
+
 @JsonSerializable(createToJson: false)
 class PotionDataDto {
   final String? id;
@@ -47,9 +46,9 @@ class PotionDataDto {
     this.attributes,
   });
 
-  factory PotionDataDto.fromJson(Map<String, dynamic> json) =>
-      _$PotionDataDtoFromJson(json);
+  factory PotionDataDto.fromJson(Map<String, dynamic> json) => _$PotionDataDtoFromJson(json);
 }
+
 @JsonSerializable(createToJson: false)
 class PotionAttributesDataDto {
   final String? name;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class ErrorDialog extends StatelessWidget {
   final String? error;
   const ErrorDialog(this.error, {super.key});

@@ -21,22 +21,22 @@ class PotterRepository extends ApiInterface {
     OnErrorCallback? onError,
     int page = 1,
     int pageSize = 25,
-      }) async {
+  }) async {
     try {
       const String url = '$_baseUrl/v1/potions';
       final Response<dynamic> response = await _dio.get<Map<dynamic, dynamic>>(
-          url,
-          //queryParameters: q != null ? {'filter[name_cont]': q} : null,
+        url,
+        //queryParameters: q != null ? {'filter[name_cont]': q} : null,
         queryParameters: {
-            'filter[name_cont]' : q,
-            'page[number]' : page,
-            'page[size]' : pageSize,
+          'filter[name_cont]': q,
+          'page[number]': page,
+          'page[size]': pageSize,
         },
       );
       final PotionsDto dto = PotionsDto.fromJson(response.data as Map<String, dynamic>);
       final HomeData data = dto.toDomain();
       return data;
-    } on DioException catch (e){
+    } on DioException catch (e) {
       onError?.call(e.error?.toString());
       return null;
     }

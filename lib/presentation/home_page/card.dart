@@ -1,37 +1,46 @@
 part of 'home_page.dart';
-typedef OnLikeCallback = void Function(bool isLiked)?;
 
-class _MyCardWidget extends StatefulWidget {
+typedef OnLikeCallback = void Function(String? id, String title, bool isLiked)?;
+
+class _MyCardWidget extends StatelessWidget {
   final String text;
   final String description;
   final String? image;
   final OnLikeCallback onLike;
   final VoidCallback? onTap;
+  final String? id;
+  final bool isLiked;
   const _MyCardWidget(
-      this.text, {
-        required this.description,
-        this.image,
-        this.onLike,
-        this.onTap,
-      });
-  factory _MyCardWidget.formData(CardData data, {OnLikeCallback onLike, VoidCallback? onTap,}) => _MyCardWidget(
-    data.text,
-    description: data.description,
-    image: data.image,
-    onLike: onLike,
-    onTap: onTap,
-  );
+    this.text, {
+    required this.description,
+    this.image,
+    this.onLike,
+    this.onTap,
+        this.id,
+        this.isLiked = false,
+  });
+  factory _MyCardWidget.formData(
+    CardData data, {
+    OnLikeCallback onLike,
+    VoidCallback? onTap,
+        bool isLiked = false,
+  }) =>
+      _MyCardWidget(
+        data.text,
+        description: data.description,
+        image: data.image,
+        onLike: onLike,
+        onTap: onTap,
+        isLiked: isLiked,
+        id: data.id,
+      );
 
-  @override
-  State<_MyCardWidget> createState() => _MyCardWidgetState();
-}
-
-class _MyCardWidgetState extends State<_MyCardWidget> {
-  bool isLiked = false;
+  /*@override
+  State<_MyCardWidget> createState() => _MyCardWidgetState();*/
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(top: 10),
         constraints: const BoxConstraints(minHeight: 200),
@@ -41,8 +50,7 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
             border: Border.all(
               color: Colors.purple,
               width: 3,
-            )
-        ),
+            )),
         child: IntrinsicHeight(
           child: Row(
             //mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -57,7 +65,7 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
                   height: double.infinity,
                   width: 150,
                   child: Image.network(
-                    widget.image ?? '',
+                    image ?? '',
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => const Placeholder(),
                   ),
@@ -70,11 +78,11 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.text,
+                        text,
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       Text(
-                        widget.description,
+                        description,
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ],
@@ -83,16 +91,10 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
               ),
               Align(
                 alignment: Alignment.bottomRight,
-                child:
-                Padding(
+                child: Padding(
                   padding: const EdgeInsets.only(left: 8.0, right: 16, bottom: 16),
                   child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isLiked = !isLiked;
-                      });
-                      widget.onLike?.call(isLiked);
-                    },
+                    onTap: () => onLike?.call(id, text, isLiked),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
                       child: isLiked
@@ -116,3 +118,8 @@ class _MyCardWidgetState extends State<_MyCardWidget> {
     );
   }
 }
+
+/*class _MyCardWidgetState extends State<_MyCardWidget> {
+  bool isLiked = false;*/
+
+//}
